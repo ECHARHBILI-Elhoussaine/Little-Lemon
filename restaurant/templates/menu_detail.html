@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <h1>Menu Item List</h1>
+    <nav aria-label="breadcrumb navbar-light bg-light">
+        <ol class="breadcrumb bg-light">
+            {% for item in menu_hierarchy %}
+            <li class="breadcrumb-item bg-light"><a href="{{ item.url }}">{{ item.title }}</a></li>
+            {% endfor %}
+        </ol>
+    </nav>
+
+    <div class="card-deck">
+        <h1>{{ menu_item.menu_name }}</h1>
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5 class="card-title">{{ menu_item.menu_name }}</h5>
+                        <p>{{ menu_item.menu_description }}</p>
+                        <p class="card-text">price: ${{ menu_item.menu_price }}</p>
+                    </div>
+                    <div class="col-md-6 text-center">
+                        <img src="{{ menu_item.menu_image.url }}" class="card-img-top" alt="Menu Image" style="width:200px;">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add more cards here if needed -->
+    </div>
+</div>
+{% endblock %}

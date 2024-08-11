@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="container">
+    <h1>Menu</h1>
+    <div class="row">
+        {% for item in menu_data %}
+        <div class="col-md-12 mb-4"> <!-- Adjust the column width and margin as needed -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title"><a href="{{ item.menu_url }}">{{ item.menu_name }}</a></h5>
+                    <p class="card-text">${{ item.menu_price }}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

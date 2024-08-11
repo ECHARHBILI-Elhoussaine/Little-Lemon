@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<section>
+  <article>
+    <h1>Make a reservation</h1>
+    <!--Begin row-->
+    <div class="row">
+      <!--Begin col-->
+      <div class="column">
+        <form id="reservationForm" action="" method="post">
+          {% csrf_token %}
+          <label for="id_name">Name:</label>
+          <input class="form-control" type="text" id="id_name" name="name" required>
+          <br>
+          <label for="id_reservation_date">Date:</label>
+          <input class="form-control" type="date" id="id_reservation_date" name="reservation_date" required>
+          <br>
+          <label for="id_reservation_time">Time:</label>
+          <select class="form-control" id="id_reservation_time" name="reservation_time" required>
+            <option value="">Select a time</option>
+          </select>
+          <br>
+          <input type="submit" id="button" value="Reserve">
+        </form>
+      </div>
+      <!--End col-->
+
+      <!--Begin col-->
+      <div class="column">
+        {% comment %} <div class="videowrap">
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d11898.289517452584!2d-87.60853049433447!3d41.79442860243028!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x880e2912ce6f7027%3A0xc0cfb5545d4a37b2!2sHyde%20Park%2C%20Chicago%2C%20IL%2C%20USA!5e0!3m2!1sen!2spt!4v1662384760663!5m2!1sen!2spt"
+            width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div> {% endcomment %}
+        <h2>Reservations for selected date:</h2>
+        <ul id="reservations-list">
+          {% for reservation in reservations %}
+            <li>{{ reservation.name }} - {{ reservation.reservation_time }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      <!--End col-->
+    </div>
+    <!--End row-->
+
+    <!-- Display reservations for the selected date -->
+  </article>
+</section>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    // Populate the select dropdown with all available timeslots
+    var timeslots = [];
+    for (var hour = 8; hour < 21; hour++) {
+        for (var minute of [0, 15, 30, 45]) {
+            timeslots.push(hour.toString().padStart(2, '0') + ':' + minute.toString().padStart(2, '0'));
+        }
+    }
+    $.each(timeslots, function(index, timeslot) {
+        $('#id_reservation_time').append($('<option>', {value: timeslot}).text(timeslot));
+    });
+
+    $('#id_reservation_date').change(function() {
+        var selectedDate = $(this).val();
+        var csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
+        $.ajax({
+            url: '{% url "book" %}',
+            type: 'POST',
+            data: {'reservation_date': selectedDate},
+            headers: {'X-CSRFToken': csrfToken},
+            dataType: 'json',
+            success: function(data) {
+                var reservedTimes = data.reserved_times;
+                var timeslots = data.timeslots;
+                var reservations = data.reservations;
+
+                // Update the select options and disable reserved times
+                $('#id_reservation_time').empty();
+                $.each(timeslots, function(index, timeslot) {
+                    var option = $('<option>', {value: timeslot}).text(timeslot);
+                    if ($.inArray(timeslot, reservedTimes) !== -1) {
+                        option.prop('disabled', true);
+                    }
+                    $('#id_reservation_time').append(option);
+                });
+
+                // Display reservations for the selected date
+                var reservationsList = $('#reservations-list');
+                reservationsList.empty();
+                $.each(reservations, function(index, reservation) {
+                    var listItem = $('<li>').text(reservation.name + ' - ' + reservation.reservation_time);
+                    reservationsList.append(listItem);
+                });
+            }
+        });
+    });
+});
+</script>
+
+{% endblock %}
